@@ -1,0 +1,22 @@
+command /fly [<offlineplayer>]:
+	trigger:
+		if arg-1 is not set:
+			if player can fly:
+				disable fly for player
+				send "&9&lFly Disabilitata"
+			else:
+				enable fly to player
+				send "&9&lFly Abilitata"
+		else:
+			if arg-1 can fly:
+				disable fly for arg-1
+				send "&9&lFly Disabilitata per %arg-1%"
+			else:
+				enable fly to arg-1
+				send "&9&lFly Abilitata per %arg-1%"
+		
+command /flyspeed <number>:
+	trigger:
+		set the fly speed of player to arg-1
+		send "Flight speed modified to: %fly speed of player%"
+		

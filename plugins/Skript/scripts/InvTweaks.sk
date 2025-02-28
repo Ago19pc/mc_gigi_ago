@@ -1,0 +1,54 @@
+options:
+	CP: [INVTWEAKS]
+	LP: intw.invtrash
+
+# INVSEE: See player's inventory
+# TRASHINV: Quickly remove useless stuff from inventory
+
+
+command /ti <text>:
+	aliases: trashinv
+	trigger:
+		if arg-1 is "all":
+			clear player's inventory
+		loop {{@LP}.trashsetlist::*}:
+			if arg-1 is equal to loop-value-1:
+				loop {{@LP}.trashset.%arg-1%::*}:
+					remove all loop-value-2 from player's inventory
+				exit loop
+				
+command /it add <text> <item>:
+	trigger:
+		add arg-2 to {{@LP}.trashset.%arg-1%::*}
+		send "{@LP} Added %arg-2% to trashset %arg-1%"
+		
+command /it delete_element <text> [from] <text>:
+	trigger:
+		if arg-1 is not set:
+			send "{@CP} Correct usage: /it delete_element <element> [from] <trashset>"
+		else:
+			remove arg-2 from {{@LP}.trashset.%arg-1%}
+			send "{@CP} Removed %arg-1% from %arg-2%"
+
+command /it delete_set <text>:
+	trigger:
+		if arg-1 is not set:
+			send "{@CP} Correct usage: /it delete_set <trashset>"
+		else:
+			remove arg-1 from {{@LP}.trashsetlist::*}
+			send "{@CP} Removed trashet %arg-1%"
+		
+	
+command /invsee [<offline player>]:
+	usage: @LP &7See a player's inventory
+	trigger:
+		if arg-1 is not set:
+			send "{@CP} &7Please use &c/invsee <player> &7insted."
+		if arg-1 is set:
+			if arg 1 is online:
+				open arg-1's inventory to the player
+				send "{@CP} Opened %arg-1% inventory"
+			else:
+				send "{@CP} &7Sorry but &c%arg-1% &7is not online."
+			
+			

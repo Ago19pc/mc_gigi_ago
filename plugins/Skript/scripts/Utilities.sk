@@ -1,0 +1,20 @@
+command /repair:
+	trigger:
+		if {balance.%player%} >= 500:
+			remove 500 from {balance.%player%}
+			repair held item of player
+			send "%held item% riparato"
+		else:
+			send "Non hai abbastanza soldi!"
+			
+command /getenchant:
+	trigger:
+		loop enchantments of player's tool:
+			set {_t} to loop-value
+			send "%{_t}%"
+			
+			set {_n} to length of {_t}
+			set {_s} to {_n}
+			remove 1 from {_s}
+			send "%{_n}%"
+			send "%subtext of {_t} from characters {_s} to {_n}-1%"

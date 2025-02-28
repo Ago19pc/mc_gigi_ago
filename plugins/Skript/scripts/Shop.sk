@@ -1,0 +1,255 @@
+options:
+	SHOPNAME: "&6&lSHOP"
+	CURRENCY: $
+
+on load:
+	shopupdate()
+
+
+
+command /shop [<text>] [<item>] [<integer>] [<number>]:
+	trigger:
+		if arg-1 is not set:
+			
+			set {Shop.openinv.%player%} to 1
+			set slot 53 of {Shop.shopgui.%{Shop.openinv.%player%}%} to emerald named "&2%{balance.%player%}%{@CURRENCY}"
+			open {Shop.shopgui.1} to player
+		else if arg-1 is "help":
+			send "----------[SHOP - HELP]----------"
+			send "additem <item> <amount> <price>"
+			send "removeitem <item>"
+			send "update"
+			send "getprice <item>"
+			send "---------------------------------"
+		else if arg-1 is "getprice":
+			send "%arg-2%: %{Shop.material.price.%arg-2%}%"
+		else if arg-1 is "additem":
+			if arg-2 is not set:
+				send "&c&lSHOP: Correct usage /shop additem <item> <amount> <price>"
+			else if arg-3 is not set:
+				send "&c&lSHOP: Correct usage /shop additem <item> <amount> <price>"
+			else if arg-4 is not set:
+				send "&c&lSHOP: Correct usage /shop additem <item> <amount> <price>"
+			else:
+				if contains({Shop.materials::*}, arg-2) is false:
+					add arg-2 to {Shop.materials::*}
+					set {Shop.material.price.%arg-2%} to arg-4
+					set {Shop.material.amount.%arg-2%} to arg-3
+					send "&a&lSHOP: Added %arg-3% %arg-2% for %arg-4%"
+				else:
+					set {Shop.material.price.%arg-2%} to arg-4
+					set {Shop.material.amount.%arg-2%} to arg-3
+					send "&a&lSHOP: Modified price for %arg-3% %arg-2% to %arg-4%"
+			shopupdate()
+		else if arg-1 is "update":
+			shopupdate()
+			send "&a&lSHOP: UPDATED"
+		if arg-1 is "removeitem":
+			if arg-2 is set:
+				if contains({Shop.materials::*}, arg-2) is false:
+					send "&c&lSHOP: Item cannot be found"
+				else: 
+					remove arg-2 from {Shop.materials::*}
+					clear {Shop.material.price.%arg-2%}
+					clear {Shop.material.amount.%arg-2%}
+					send "&c&lSHOP: Removed %arg-2% from shop"
+					shopupdate()
+			else:
+				send "&c&lSHOP: Specify Item"
+
+#SX COMPRA DX VENDI
+
+on inventory click:
+	if inventory name is {@SHOPNAME}:
+		if index of event-slot > 44:
+			cancel event
+			if index of event-slot is 49:
+				close player's inventory
+			else if index of event-slot is 50:
+				if event-itemtype is arrow:
+					close player's inventory
+					add 1 to {Shop.openinv.%player%}
+					open {Shop.shopgui.%{Shop.openinv.%player%}%} to player
+			else if index of event-slot is 48:
+				if event-itemtype is arrow:
+					close player's inventory
+					remove 1 from {Shop.openinv.%player%}
+					open {Shop.shopgui.%{Shop.openinv.%player%}%} to player
+		if the 2nd line of event-itemtype's lore is "{@CURRENCY}":
+			set {_calc} to index of event-slot + ({Shop.openinv.%player%} - 1) * 45 + 1
+			set {_price} to {Shop.material.price.%{Shop.materials::%{_calc}%}%}		#
+			cancel event
+			if click type is right mouse button:			#VENDI
+				
+				set {_itemtype} to event-itemtype
+				clear lore of {_itemtype}
+				if player has {_itemtype}:
+					remove {_itemtype} from player's inventory
+					add {_price} to {balance.%player%}
+			
+			else if click type is right mouse button with shift: #VENDI TUTTO
+	
+				set {_itemtype} to event-itemtype
+				clear lore of {_itemtype}
+				if player has {_itemtype}:
+					
+		
+					set {_amount} to amount of {_itemtype} in player's inventory
+					set {_t} to floor({_amount}/(item amount of event-itemtype))
+					
+					set item amount of {_itemtype} to {_t} * (item amount of event-itemtype) 
+					remove {_itemtype} from player's inventory
+					add ({_t}*{_price}) to {balance.%player%}
+				else:
+					send "YOU DON'T HAVE ENOUGHT ITEMS"
+					
+				
+				
+			else if click type is left mouse button:    	#COMPRA	
+				if {balance.%player%} >= {_price}:
+					remove {_price} from {balance.%player%}
+					set {_it} to event-itemtype
+					clear lore of {_it}
+					give {_it} to player
+					send "&a&lSHOP: You bought %event-item%"
+				else:	
+					send "&c&lSHOP: You don't have enough {@CURRENCY}"
+					
+			
+			else if click type is left mouse button with shift:		#COMPRA STACK
+				if {balance.%player%} >= (64 * {_price}):
+					remove (64 * {_price}) from {balance.%player%}
+					set {_it} to event-itemtype
+					clear lore of {_it}
+					give 64 of {_it} to player
+					send "&a&lSHOP: You bought a stack of %event-item%"
+				else:	
+					send "&c&lSHOP: You don't have enough {@CURRENCY}"
+	
+		#close player's inventory
+		set slot 53 of {Shop.shopgui.%{Shop.openinv.%player%}%} to emerald named "&2%{balance.%player%}%{@CURRENCY}"
+		open {Shop.shopgui.%{Shop.openinv.%player%}%}
+				
+
+
+command /deletevar <text>:
+	trigger:
+		delete {%arg-1%}
+		send "SYSTEM: DELETED %arg-1%"
+		
+
+command /showlvar <text>:
+	trigger:
+		send "-----[%arg-1%]-----"
+		loop {%arg-1%::*}:
+			send "%loop-index%: %loop-value%"
+		send "-------------------"
+		send "%{%arg-1%}%"
+		send "-------------------"
+		
+command /sellhand:
+	trigger:
+		if contains({Shop.materials::*}, type of player's tool) is true:
+			set {_amnt} to amount of type of player's tool in player's inventory			
+			set {_name} to type of player's tool
+			loop {Shop.materials::*}:
+				if loop-value is {_name}:
+					set {_position} to loop-index
+					stop loop
+			add ({Shop.material.price.%{Shop.materials::%{_position}%}%} * {_amnt}) to {balance.%player%}
+			send "&a&lSHOP: You sold %{_amnt}% %type of player's tool% for %{Shop.material.price.%{Shop.materials::%{_position}%}%} * {_amnt}%$ "
+			remove all type of player's tool from player
+		else: 
+			send "&c&lSHOP: %type of player's tool% not present in shop add it with /shop additem <item> <amount> <price>"
+		
+command /getprice:
+	trigger:
+		if contains({Shop.materials::*}, type of player's tool) is true:
+			set {_name} to type of player's tool
+			loop {Shop.materials::*}:
+				if loop-value is {_name}:
+					set {_position} to loop-index
+					stop loop
+			send "&a&lSHOP: %{_name}%: %{Shop.material.price.%{Shop.materials::%{_position}%}%}%"
+		else:
+			send "&c&lSHOP: %{_name}% not present in shop"
+			
+# buyitem.sk
+
+command /buy <text> <integer = 1>:
+    description: Buy the specified number of items from the shop
+    usage: /buy <item> <amount=1>
+    trigger:
+        if arg-1 is not set:
+            send "&cCorrect usage: /buy <item> <amount=1>" to player
+        else:
+            set {_item} to argument 1 parsed as item type
+            if {_item} is not set:
+                send "&c&lSHOP: Can't find %arg-1%." to player
+            else:
+                set {_amount} to arg-2
+                set {_found} to false
+                loop {Shop.materials::*}:
+                    if loop-value is {_item}:
+                        set {_pos} to loop-index
+                        set {_found} to true
+                        stop loop
+                if {_found} is false:
+                    send "&c&lSHOP: Can't find %arg-1%." to player
+                else:
+                    set {_price} to {Shop.material.price.%{Shop.materials::%{_pos}%}%}
+                    set {_totalCost} to {_amount} * {_price}
+                    if {balance.%player%} >= {_totalCost}:
+                        remove {_totalCost} from {balance.%player%}
+                        give {_amount} of {_item} to player
+                        send "&a&lSHOP: You bought %{_amount}% %{_item}% for $%{_totalCost}%." to player
+                    else:
+                        send "&c&lSHOP: You don't have enough money." to player
+
+
+
+function contains(list: objects, check: object) :: boolean:
+    loop {_list::*}:
+        if loop-value is {_check}:
+            return true
+    return false
+	
+function shopupdate():
+	set {_menuamount} to floor((size of {Shop.materials::*}) / 45) + 1
+	
+	loop {_menuamount} times:
+		if loop-number is 1:
+			set {Shop.shopgui.%loop-number%} to chest inventory with 6 rows named {@SHOPNAME}
+			set slot 49 of {Shop.shopgui.%loop-number%} to barrier named "&cClose"
+			if {_menuamount} > 1:
+				set slot 50 of {Shop.shopgui.%loop-number%} to arrow named "&6Next page"
+		else if loop-number is {_menuamount}:
+			set {Shop.shopgui.%loop-number%} to chest inventory with 6 rows named {@SHOPNAME}
+			set slot 48 of {Shop.shopgui.%loop-number%} to arrow named "&6Previuos page"
+			set slot 49 of {Shop.shopgui.%loop-number%} to barrier named "&cClose"
+		else:
+			set {Shop.shopgui.%loop-number%} to chest inventory with 6 rows named {@SHOPNAME}
+			set slot 48 of {Shop.shopgui.%loop-number%} to arrow named "&6Previuos page"
+			set slot 49 of {Shop.shopgui.%loop-number%} to barrier named "&cClose"
+			set slot 50 of {Shop.shopgui.%loop-number%} to arrow named "&6Next page"
+	
+	
+	set {_index} to 0
+	loop {Shop.materials::*}:
+		
+		set {_it} to loop-value with lore "%{Shop.material.price.%loop-value%}%"
+		set line 2 of lore of {_it} to "{@CURRENCY}"
+		set line 3 of lore of {_it} to "(SHIFT + ) LEFT CLICK TO BUY (ALL)| (SHIFT + ) RIGHT CLICK TO SELL (ALL)"
+		
+		set {_md} to {_index}
+		set {_md} to {_md} / 45
+		set {_md} to floor({_md})
+		add 1 to {_md}
+		
+		set slot mod({_index}, 45) of {Shop.shopgui.%{_md}%} to {_it}
+		loop {Shop.material.amount.%loop-value%} - 1 times:
+			add {_it} to {Shop.shopgui.%{_md}%}
+		add 1 to {_index}
+		
+		
+

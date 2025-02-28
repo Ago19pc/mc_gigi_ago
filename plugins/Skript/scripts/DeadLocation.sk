@@ -1,0 +1,17 @@
+on death of player:
+	set {deathpos.%victim%} to victim's position
+	
+command /back:
+	trigger:
+		if {deathpos.%player%} is not set:
+			send "&c&lNon hai una posizione per /back"
+		else:
+			teleport player to {deathpos.%player%}
+			send "&6&lTeletrasportato alla posizione precedente"
+
+on teleport:
+	set {deathpos.%event-player%} to past event-location
+
+command /pb:
+	trigger:
+		send "%{deathpos.%player%}%"

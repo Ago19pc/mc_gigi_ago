@@ -1,0 +1,3 @@
+on tab completion for command "warp":
+	loop {warp::*}:
+		add loop-index to tab completions

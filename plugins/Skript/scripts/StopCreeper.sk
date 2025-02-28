@@ -1,0 +1,3 @@
+on entity target:
+	event-entity is creeper
+	cancel event

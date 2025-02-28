@@ -1,0 +1,43 @@
+command /setwarp [<text>]:
+	trigger:
+		if arg-1 is not set:
+			send "Correct Usage: /setwarp [warp_name]"
+		else:
+			if {warp::%arg-1%} exists:
+				send "Warp already exists"
+			else:
+				set {warp::%arg-1%} to player's position
+				send "Warp %arg-1% settato"
+
+command /warp [<text>]:
+	trigger:
+		if arg-1 is not set:
+			message "&9 ----- [WARP LIST] -----"
+			loop {warp::*}:
+				message "&9• &e%loop-index%"
+			message "&9----------------------"
+		else:
+			if {warp::%arg-1%} exists:
+				teleport player to {warp::%arg-1%}
+				send "Teletrasportato al warp %arg-1%"
+			else:
+				send "Warp %arg-1% doesn't exist"
+			
+command /warplist:
+	trigger:
+		message "&9 ----- [WARP LIST] -----"
+		loop {warp::*}:
+			message "&9• &e%loop-index%"
+		message "&9----------------------"
+
+command /delwarp [<text>]:
+	trigger:
+		if arg-1 is not set:
+			send "Correct Usage: /delwarp [warp_name]"
+		else:
+			if {warp::%arg-1%} exists:
+				delete {warp::%arg-1%}
+				send "Warp %arg-1% deleted"
+			else:
+				send "Warp already exist"
+				

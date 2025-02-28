@@ -1,0 +1,327 @@
+options:
+	prefix-text: &2[&6$&2]&r
+# Skript made by xXRoGXx, you are not allowed to redistribute this software.
+# You can use it, you are only allowed to modify the messages and permissions.
+# If you want to add or change or remove something or you've got some suggestion message me on
+# the spigot page: https://www.spigotmc.org/members/xxrogxx.219114/
+
+# The players balance will be saved on another file in the Skript folder, don't modify it or you can lose some variables.
+# Balance will remain also when the server restarts or closes.
+
+#Permissions:
+# /economyhandler : economyhandler.help
+# /balance : economyhandler.balance
+# /pay : economyhandler.pay
+# /setbalance : economyhandler.admin.setbalance
+# /addbalance : economyhandler.admin.setbalance
+# /fixbalance : economyhandler.admin.fixbalance
+# /banktype : economyhandler.admin.banktype (WIP, don't use it)
+# /bank : economyhandler.bank.player
+# /deposit : economyhandler.bank.deposit
+# /withdraw : economyhandler.bank.withdraw
+# /adeposit : economyhandler.bank.admin.deposit
+# /awithdraw : economyhandler.bank.admin.withdraw
+# /bbset : economyhandler.bank.admin.bbset
+
+
+
+	
+
+on join:
+	if {balance.%player%} doesn't exist:
+		set {balance.%player%} to 0
+		stop
+		
+		
+#Player Commands
+
+command /economyhandler:
+	permission: economyhandler.help
+	permission message: &4You don't have the permission to do this (economyhandler.help)
+	trigger:
+		send ""
+		send "&2---------- &2[&6$&2]&r &2----------"
+		send "&2/economyhandler &3(Player)"
+		send "&2/balance &3(Player)"
+		send "&2/pay &3(Player)"
+		send "&2/setbalance &4(Admin)"
+		send "&2/addbalance &4(Admin)"
+		send "&2/fixbalance &4(Admin)"
+		send "&2/bank &3(Player)"
+		send "&2/deposit &3(Player)"
+		send "&2/withdraw &3(Player)"
+		send "&2/adeposit &4(Admin)"
+		send "&2/awithdraw &4(Admin)"
+		send "&2/bbset &4(Admin)"
+		send "&2---------- &2[&6$&2]&r &2----------"
+		send ""
+
+command /balance [<offlineplayer>]:
+	aliases: bal
+	permission: economyhandler.balance
+	permission message: &4You don't have the permission to do this (economyhandler.balance)
+	trigger:
+		if arg-1 is not set:
+			send "&2[&6$&2]&r &2Balance: &3%{balance.%player%}%&6$"
+			stop
+		else:
+			send "&2[&6$&2]&r &2%arg-1%: &3%{balance.%arg-1%}%&6$"
+			stop
+		
+command /pay <offlineplayer> <number>:
+	permission: economyhandler.pay
+	permission message: &4You don't have the permission to do this (economyhandler.pay)
+	trigger:
+		if arg 1 is not set:
+			send "Correct usage: /pay <player> <number>"
+			stop
+		else:
+			if {balance.%player%} < arg 2:
+				send "&2[&6$&2]&r &cYou don't have enough money"
+				stop
+			else:
+				remove arg 2 from {balance.%player%}
+				send "&2[&6$&2]&r &2You paid &3%arg-2%&6$ &2to &3%arg-1%" to player
+				add arg 2 to {balance.%arg 1%}
+				send "&2[&6$&2]&r &2You recived &3%arg-2%&6$ &2from &3%player%" to arg 1
+				stop
+		
+#Admin Commands
+command /setbalance [<offlineplayer>] [<number>]:
+	permission: economyhandler.admin.setbalance
+	permission message: &4You don't have the permission to do this (economyhandler.admin.setbalance)
+	trigger:
+		if arg 1 is not set:
+			send "&cCorrect usage: /setbalance <player> <amount>"
+			stop
+		if arg 2 is not set:
+			send "&cCorrect usage: /setbalance <player> <amount>"
+			stop
+		else:
+			set {balance.%arg-1%} to arg 2
+			send "&2[&6$&2]&r &2New Balance: &3%{balance.%arg-1%}%&6$ &2from &3%arg-1%"
+			stop
+			
+command /addbalance [<offlineplayer>] [<number>]:
+	permission: economyhandler.admin.addbalance
+	permission message: &4You don't have the permission to do this (economyhandler.admin.addbalance)
+	trigger:
+		if arg 1 is not set:
+			send "&cCorrect usage: /addbalance <player> <amount>"
+			stop
+		if arg 2 is not set:
+			send "&cCorrect usage: /addbalance <player> <amount>"
+			stop
+		else:
+			add arg 2 to {balance.%arg-1%}
+			send "&2[&6$&2]&r &2Added &3%arg-2%&6$ &2to &3%arg-1%"
+			send "&2[&6$&2]&r &2New Balance: &3%{balance.%arg-1%}%&6$"
+			stop
+			
+#If a player doesn't have a balance (<none>)
+#Attention, the balance will be set to 0
+command /fixbalance [<offlineplayer>]:
+	permission: economyhandler.admin.fixbalance
+	permission message: &4You don't have the permission to do this (economyhandler.admin.fixbalance)
+	trigger:
+		set {balance.%arg-1%} to 0
+		send "&2[&6$&2]&r &bBalance fixed with &30&6$ &2to &3%arg-1%" to player
+
+
+#Bank System
+
+# command /banktype [<text>]:
+	# permission: economyhandler.admin.banktype
+	# permission message: &4You don't have the permission to do this (economyhandler.admin.banktype)
+	# trigger:
+		# if arg-1 is not set:
+			# send "&cCorrect usage: /banktype [<type>]"
+			# send "&cUse '/banktype help' to learn how to use it"
+		# if arg-1 is "help":
+			# send "&2---------- &9Bank Types&2 ----------"
+			# send "&3/banktype help &2-> Display this"
+			# send "&3/banktype on &2-> Activates Bank for everybody"
+			# send "&3/banktype off &2-> Deactivates Bank for everybody"
+			# send "&3/banktype permission &2-> Activates Bank only for people who has the permission"
+			# send "&3/banktype see &2-> See what banktype is right now"
+		# if arg-1 is "on":
+			# set {globalbank} to "on"
+			# send "&9BankType On"
+		# if arg-1 is "off":
+			# set {globalbank} to "off"
+			# send "&9BankType Off"
+		# if arg-1 is "permission":
+			# set {globalbank} to "permission"
+			# send "&9BankType Permission"
+		# if arg-1 is "see":
+			# if {globalbank} is "on":
+				# send "&9BankType On"
+			# if {globalbank} is "off":
+				# send "&9BankType Off"
+			# if {globalbank} is "permission":
+				# send "&9BankType Permission"
+			
+command /bank [<text>] [<offlineplayer>]:
+	permission: economyhandler.bank.player
+	permission message: &4You don't have the permission to do this (economyhandler.bank.player)
+	trigger:
+		if arg-1 is not set:
+			send "&cCorrect usage: /bank [<action>] <offlineplayer>"
+			send "&cUse '/bank help' to learn how to use it"
+		if arg-1 is "help":
+			send "&2---------- &9Bank Actions&2 ----------"
+			send "&3/bank help &2-> Display this"
+			send "&3/bank balance &2-> Display your bank balance"
+			send "&3/bank balance <player> &2-> Display a player's bank balance"
+			send "&3/bank create &2-> Create your bank account"
+			send "&3/bank create <player> &2 -> Create a bank account for another player &4(Only Admins)"
+			send "&3/bank delete &2-> Delete a Bank account"
+			send "&3/bank delete <player> &2-> Delete a player's Bank account"
+			send "&3/deposit <ammount> &2-> Deposit to your bank account"
+			send "&3/withdraw <ammount> &2-> Withdraw from your bank account"
+			send "&3/adeposit <player> <ammount> &2-> Deposit to a player bank account &4(Only Admins)"
+			send "&3/awithdraw <player> <ammount> &2-> Withdraw from a bank account &4(Only Admins)"
+		if arg-1 is "create":
+			if arg-2 is not set:
+				if {bankbalance.%player%} doesn't exist:
+					set {bankbalance.%player%} to 0
+					send "&2[&6$&2]&r &2Bank Balance Created"
+				else:
+					send "&2[&6$&2]&r &cYou already have a bank account"
+			else:
+				if {bankbalance.%arg-2%} doesn't exist:
+					set {bankbalance.%arg-2%} to 0
+					send "&2[&6$&2]&r &2Bank Balance created for %arg-2%"
+				else:
+					send "&2[&6$&2]&r &c%arg-2% already has a bank account"
+		if arg-1 is "delete":
+			if arg-2 is not set:
+				if {bankbalance.%player%} doesn't exist:
+					send "&2[&6$&2]&r &cThat Bank account doesn't exists"
+				else:
+					clear {bankbalance.%player%}
+					send "&2[&6$&2]&r &2Your Bank account has been deleted"
+			else:
+				clear {bankbalance.%arg-2%}
+				send "&2[&6$&2]&r &2%arg-2%'s Banks account has been deleted"
+		if arg-1 is "balance":
+			if arg-2 is not set:
+				if {bankbalance.%player%} doesn't exist:
+					send "&2[&6$&2]&r &cYou don't have a bank balance"
+				else:
+					send "&2[&6$&2]&r &2Your bank balance: %{bankbalance.%player%}%"
+			else:
+				if {bankbalance.%arg-2%} doesn't exist:
+					send "&2[&6$&2]&r &c%arg-2%'s bank balance doesn't exist"
+				else:
+					send "&2[&6$&2]&r &2%arg-2%'s bank balance is: %{bankbalance.%arg-2%}%"
+command /deposit [<number>]:
+	permission: economyhandler.bank.deposit
+	permission message: &4You don't have the permission to do this (economyhandler.bank.deposit)
+	trigger:
+		if {bankbalance.%player%} doesn't exist:
+			send "&2[&6$&2]&r &c%player%'s bank account doesn't exist"
+		else:	
+			if arg-1 is not set:
+				send "&cCorrect usage: /deposit [<ammount>]"
+			else:
+				if arg-1 > {balance.%player%}:
+					send "&2[&6$&2]&r &cYou don't have enough money"
+				else:
+					remove arg-1 from {balance.%player%}
+					add arg-1 to {bankbalance.%player%}
+					send "&2[&6$&2]&r &2Deposited %arg-1% to your bank account"
+	
+	
+command /withdraw [<number>]:
+	permission: economyhandler.bank.withdraw
+	permission message: &4You don't have the permission to do this (economyhandler.bank.withdraw)
+	trigger:
+		if {bankbalance.%player%} doesn't exist:
+			send "&2[&6$&2]&r &c%player%'s bank account doesn't exist"
+		else:	
+			if arg-1 is not set:
+				send "&cCorrect usage: /withdraw [<ammount>]"
+			else:
+				if arg-1 > {bankbalance.%player%}:
+					send "&2[&6$&2]&r &cYou don't have enough money"
+				else:
+					remove arg-1 from {bankbalance.%player%}
+					add arg-1 to {balance.%player%}
+					send "&2[&6$&2]&r &2Withdrawn %arg-1% from yout bank account"
+
+
+# Admin command deposit and withdraw and balance set
+command /adeposit [<offlineplayer>] [<number>]:
+	permission: economyhandler.bank.admin.deposit
+	permission message: &4You don't have the permission to do this (economyhandler.bank.deposit)
+	trigger:
+		if {bankbalance.%arg-1%} doesn't exist:
+			send "&2[&6$&2]&r &c%arg-1%'s bank account doesn't exist"
+		else:	
+			if arg-1 is not set:
+				send "&cCorrect usage: /adeposit [<player>] [<ammount>]"
+			else:
+				if arg-2 is not set:
+					send "&cCorrect usage: /adeposit [<player>] [<ammount>]"
+				else:
+					send "&2[&6$&2]&r &2Added %arg-2% to %arg-1%'s bank account"
+					add arg-2 to {bankbalance.%arg-1%}
+	
+	
+command /awithdraw [<offlineplayer>] [<number>]:
+	permission: economyhandler.bank.admin.withdraw
+	permission message: &4You don't have the permission to do this (economyhandler.bank.withdraw)
+	trigger:
+		if {bankbalance.%arg-1%} doesn't exist:
+			send "&2[&6$&2]&r &c%arg-1%'s bank account doesn't exist"
+		else:	
+			if arg-1 is not set:
+				send "&cCorrect usage: /awithdraw [<player>] [<ammount>]"
+			else:
+				if arg-2 is not set:
+					send "&cCorrect usage: /awithdraw [<player>] [<ammount>]"
+				else:
+					if arg-2 > {bankbalance.%arg-1%}:
+						send "&2[&6$&2]&r &c%arg-1% doesn't have enough money"
+					else:
+						send "&2[&6$&2]&r &2Removed %arg-2% from %arg-1%'s bank account"
+						remove arg-2 from {bankbalance.%arg-1%}
+
+command /bbset [<offlineplayer>] [<number>]:
+	permission: economyhandler.bank.admin.bbset
+	permission message: &4You don't have the permissio to do this (economyhandler.bank.admin.bbset)
+	trigger:
+		if {bankbalance.%arg-1%} doesn't exist:
+			send "&2[&6$&2]&r &c%arg-1%'s bank account doesn't exist"
+		else:	
+			if arg-2 is not set:
+				send "&cCorrect usage: /bbset <player> <ammount>"
+			else:
+				set {bankbalance.%arg-1%} to arg-2
+				send "&2[&6$&2]&r &2 Setted &6%arg-2% &2 to %arg-1%'s bank account"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
